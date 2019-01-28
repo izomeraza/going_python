@@ -26,6 +26,7 @@ class ActiveQuestionDetailView(View):
         options = [{'id': choice.id, 'text': choice.choice_text} for choice in choices]
         data = {
             'question_text': question.question_text,
+            'question_id': question.id,
             'options': options,
         }
 
