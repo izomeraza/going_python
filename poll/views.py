@@ -64,3 +64,9 @@ class StartUserView(View):
         user_count.user_count += 1
         user_count.save()
         return HttpResponse()
+
+
+class StartUserStatView(View):
+    def get(self, request):
+        data = {'total': UserCount.objects.get(id=1).user_count}
+        return JsonResponse(data=data)
