@@ -61,7 +61,7 @@ class StatView(View):
 
 class StartUserView(View):
     def get(self, request):
-        UserCount.objects.filter(id=1).update(user_count=F('user_count')+1)
+        UserCount.objects.filter(id=1).update(user_count=F('user_count') + 1)
         return HttpResponse()
 
 
