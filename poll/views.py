@@ -1,7 +1,7 @@
 from django.http import HttpResponse, JsonResponse, HttpResponseNotFound, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.views import View
-from poll.models import Question, Choice, Vote
+from poll.models import Question, Choice, Vote, UserCount
 from django.core.exceptions import ObjectDoesNotExist
 
 
@@ -56,3 +56,12 @@ class StatView(View):
         }
 
         return JsonResponse(data=data)
+
+
+class StartUserView(View):
+    def get(self, request):
+        user_count = UserCount.objects.get(id=1)
+        user_count.user_count += 1
+        user_count.save()
+        return HttpResponse()
+
