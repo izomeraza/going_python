@@ -6,5 +6,5 @@ urlpatterns = [
     path('poll/', include('poll.urls')),
     path('admin/', admin.site.urls),
     path('user/started/', StartUserView.as_view()),
-    path('user/started/stat/', StartUserStatView.as_view())
+    path('user/started/stat/', StartUserStatView.as_view()),
 ]
