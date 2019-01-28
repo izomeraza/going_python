@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.views import View
 from poll.models import Question, Choice, Vote, UserCount
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import F
 
 
 class ActivationView(View):
@@ -60,13 +61,11 @@ class StatView(View):
 
 class StartUserView(View):
     def get(self, request):
-        user_count = UserCount.objects.get(id=1)
-        user_count.user_count += 1
-        user_count.save()
+        UserCount.objects.filter(id=1).update(user_count=F('user_count')+1)
         return HttpResponse()
 
 
 class StartUserStatView(View):
     def get(self, request):
-        data = {'total': UserCount.objects.get(id=1).user_count}
+        data = {'total': UserCount.objects.first().user_count}
         return JsonResponse(data=data)
