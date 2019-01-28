@@ -6,6 +6,7 @@ def forwards(apps, schema_editor):
     UserCount.objects.create()
     assert(UserCount.objects.last().id == 1)
 
+
 def backwards(apps, schema_editor):
     UserCount = apps.get_model('poll', 'UserCount')
     UserCount.objects.get(id=1).delete()

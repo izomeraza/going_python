@@ -64,4 +64,3 @@ class StartUserView(View):
         user_count.user_count += 1
         user_count.save()
         return HttpResponse()
-
