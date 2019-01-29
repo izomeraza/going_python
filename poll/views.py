@@ -1,9 +1,10 @@
+from datetime import datetime
 from django.http import HttpResponse, JsonResponse, HttpResponseNotFound, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.views import View
 from poll.models import Question, Choice, Vote, UserCount
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import F
+from django.db.models import Avg, Count, F
 
 
 class ActivationView(View):
@@ -11,6 +12,7 @@ class ActivationView(View):
         question = get_object_or_404(id=kwargs['question_id'])
         Question.objects.filter(is_active=True).update(is_active=False)
         question.is_active = True
+        question.activation_datetime = datetime.now()
         question.save()
 
         return HttpResponse()
@@ -42,7 +44,11 @@ class VoteView(View):
         if option.question != question or not question.is_active or ('user_id' not in request.GET):
             return HttpResponseBadRequest()
 
-        Vote.objects.create(choice=option, user_id=request.GET['user_id'])
+        Vote.objects.create(
+                choice=option,
+                user_id=request.GET['user_id'],
+                vote_datetime=datetime.now(),
+        )
 
         return HttpResponse()
 
@@ -69,3 +75,19 @@ class StartUserStatView(View):
     def get(self, request):
         data = {'total': UserCount.objects.first().user_count}
         return JsonResponse(data=data)
+
+
+class WinnerView(View):
+    def get(self, request):
+        pass
+        MIN_ANSWERED = 5
+        # nominees = Vote.objects.exclude(choice__is_game_over=True) # это устарело, надо от
+        # nominees = nominees.values('user_id').annotate(Count('choice')).filter(choice__count__gt=MIN_ANSWERED)
+        # nominees = nominees.annotate(delay=Avg('vote_datetime' - )).order_by('delay')
+        # if nominees.first() is None:
+        #     return JsonResponse(data={'user_id': 'here will random go'})
+        # else:
+        #     return JsonResponse(data={'user_id': nominees.first().user_id})
+
+
+
