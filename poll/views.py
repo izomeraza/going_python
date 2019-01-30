@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 from django.views import View
 from poll.models import Question, Choice, Vote, UserCount
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Avg, Count, F
+from django.db.models import Avg, Count, F, Q
 
 
 class ActivationView(View):
@@ -77,17 +77,15 @@ class StartUserStatView(View):
         return JsonResponse(data=data)
 
 
-class WinnerView(View):
+class NomineesView(View):
     def get(self, request):
-        pass
-        MIN_ANSWERED = 5
-        # nominees = Vote.objects.exclude(choice__is_game_over=True) # это устарело, надо от
-        # nominees = nominees.values('user_id').annotate(Count('choice')).filter(choice__count__gt=MIN_ANSWERED)
-        # nominees = nominees.annotate(delay=Avg('vote_datetime' - )).order_by('delay')
-        # if nominees.first() is None:
-        #     return JsonResponse(data={'user_id': 'here will random go'})
-        # else:
-        #     return JsonResponse(data={'user_id': nominees.first().user_id})
-
-
-
+        nominees = Vote.objects.\
+                            annotate(delay=F('vote_datetime') - F('choice__question_id__activation_datetime'))
+        nominees = nominees.values('user_id').\
+                            annotate(
+                                     wrong_ans=Count('choice', filter=Q(choice__is_game_over=True)),
+                                     avg_delay=Avg('delay')
+                            )
+        nominees_sorted = nominees.order_by('wrong_ans', 'avg_delay')
+        nominees_list = [nominee['user_id'] for nominee in nominees_sorted]
+        return JsonResponse(data=nominees_list[:10], safe=False)
