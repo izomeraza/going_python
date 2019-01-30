@@ -45,9 +45,9 @@ class VoteView(View):
             return HttpResponseBadRequest()
 
         Vote.objects.create(
-                choice=option,
-                user_id=request.GET['user_id'],
-                vote_datetime=datetime.now(),
+            choice=option,
+            user_id=request.GET['user_id'],
+            vote_datetime=datetime.now(),
         )
 
         return HttpResponse()
@@ -58,11 +58,7 @@ class StatView(View):
         question = get_object_or_404(id=kwargs['question_id'])
         choices = question.choices.all()
         hits = [{'id': choice.id, 'hits': choice.votes.count()} for choice in choices]
-        data = {
-            'stat': hits,
-        }
-
-        return JsonResponse(data=data)
+        return JsonResponse(data={'stat': hits})
 
 
 class StartUserView(View):
@@ -79,13 +75,11 @@ class StartUserStatView(View):
 
 class NomineesView(View):
     def get(self, request):
-        nominees = Vote.objects.\
-                    annotate(delay=F('vote_datetime') - F('choice__question_id__activation_datetime'))
-        nominees = nominees.values('user_id').\
-                    annotate(
-                             wrong_ans=Count('choice', filter=Q(choice__is_game_over=True)),
-                             avg_delay=Avg('delay')
-                    )
+        nominees = Vote.objects.annotate(delay=F('vote_datetime') - F('choice__question_id__activation_datetime'))
+        nominees = nominees.values('user_id').annotate(
+                 wrong_ans=Count('choice', filter=Q(choice__is_game_over=True)),
+                 avg_delay=Avg('delay'),
+        )
         nominees_sorted = nominees.order_by('wrong_ans', 'avg_delay')
         nominees_list = [nominee['user_id'] for nominee in nominees_sorted]
         return JsonResponse(data=nominees_list[:10], safe=False)
