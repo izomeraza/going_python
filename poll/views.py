@@ -80,12 +80,12 @@ class StartUserStatView(View):
 class NomineesView(View):
     def get(self, request):
         nominees = Vote.objects.\
-                            annotate(delay=F('vote_datetime') - F('choice__question_id__activation_datetime'))
+                    annotate(delay=F('vote_datetime') - F('choice__question_id__activation_datetime'))
         nominees = nominees.values('user_id').\
-                            annotate(
-                                     wrong_ans=Count('choice', filter=Q(choice__is_game_over=True)),
-                                     avg_delay=Avg('delay')
-                            )
+                    annotate(
+                             wrong_ans=Count('choice', filter=Q(choice__is_game_over=True)),
+                             avg_delay=Avg('delay')
+                    )
         nominees_sorted = nominees.order_by('wrong_ans', 'avg_delay')
         nominees_list = [nominee['user_id'] for nominee in nominees_sorted]
         return JsonResponse(data=nominees_list[:10], safe=False)

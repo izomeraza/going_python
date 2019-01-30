@@ -18,7 +18,7 @@ class Choice(models.Model):
     is_game_over = models.BooleanField(default=False)
 
     def __str__(self):
-        return 'q_id: {0}, {1}, {2}, # votes: {3}'.format(self.question.id, self.id, self.choice_text, self.votes.count())
+        return '{0}/{1}, {2}, votes: {3}'.format(self.question.id, self.id, self.choice_text, self.votes.count())
 
     class Meta:
         ordering = ['question', 'weight']
